@@ -1,0 +1,136 @@
+---
+import * as cheerio from "cheerio";
+// @ts-ignore
+import segment from "sentencex";
+import SwitchButton from "../components/SwitchButton.astro";
+function hasChinese(str: string) {
+  return /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]/.test(str);
+}
+let $ = cheerio.load(await Astro.slots.render("default"));
+$(
+  "li, p:not(table p):not(pre p), h1, h2, h3, h4, h5, h6, blockquote, thead"
+).each(function () {
+  if ($(this).attr("lang") || $(this).attr("data-bilingual")) return;
+  const text = $(this).text();
+  if (!text.trim()) return;
+  const lang = hasChinese(text) ? "zh" : "en";
+  $(this).attr("lang", lang);
+});
+
+$("[lang=en]").each((_, el) => {
+  const next = $(el).next();
+  next.is("[lang=zh]") &&
+    next.addBack().wrapAll('<section class="bilingual"></section>');
+});
+
+$("section > [lang]").each((_, el) => {
+  const text = $(el).text();
+  const lang = $(el).attr("lang");
+  console.info(lang);
+  const sentences = segment(lang, text);
+  const newText = sentences.map((s: string) => `<span>${s}</span>`).join("\n");
+  $(el).html(newText);
+});
+
+const html = $("body").html()?.trim();
+console.log(html);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Astro description" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Transpress</title>
+  </head>
+  <body>
+    <nav>
+      <SwitchButton
+        options={[
+          { label: "English", id: "en" },
+          { label: "中文", id: "zh" },
+          { label: "Bilingual", id: "bil", checked: true },
+        ]}
+      />
+    </nav>
+    <h1></h1>
+    <main>
+      <article set:html={html} />
+    </main>
+  </body>
+</html>
+<style is:global>
+  nav:has([type="radio"]#en:checked) ~ main [lang="zh"] {
+    display: none;
+  }
+  nav:has([type="radio"]#zh:checked) ~ main [lang="en"] {
+    display: none;
+  }
+  article span:hover {
+    background-color: #f5a9b860;
+    transition: background-color 0.1s;
+  }
+  ::selection {
+    background-color: #5bcefa80;
+  }
+
+   section > [lang="en"]:has(span:nth-of-type(1):hover) + [lang="zh"] > span:nth-of-type(1) 
+  ,section > [lang="en"]:has(span:nth-of-type(2):hover) + [lang="zh"] > span:nth-of-type(2) 
+  ,section > [lang="en"]:has(span:nth-of-type(3):hover) + [lang="zh"] > span:nth-of-type(3) 
+  ,section > [lang="en"]:has(span:nth-of-type(4):hover) + [lang="zh"] > span:nth-of-type(4) 
+  ,section > [lang="en"]:has(span:nth-of-type(5):hover) + [lang="zh"] > span:nth-of-type(5) 
+  ,section:has([lang="zh"] span:nth-of-type(1):hover) [lang="en"] > span:nth-of-type(1) 
+  ,section:has([lang="zh"] span:nth-of-type(2):hover) [lang="en"] > span:nth-of-type(2) 
+  ,section:has([lang="zh"] span:nth-of-type(3):hover) [lang="en"] > span:nth-of-type(3) 
+  ,section:has([lang="zh"] span:nth-of-type(4):hover) [lang="en"] > span:nth-of-type(4) 
+  ,section:has([lang="zh"] span:nth-of-type(5):hover) [lang="en"] > span:nth-of-type(5) 
+	{
+    background-color: #ffff0080;
+		transition: background-color 0.1s;
+  }
+
+  html {
+    font-family: system-ui, sans-serif;
+  }
+  code {
+    font-family:
+      Menlo,
+      Monaco,
+      Lucida Console,
+      Liberation Mono,
+      DejaVu Sans Mono,
+      Bitstream Vera Sans Mono,
+      Courier New,
+      monospace;
+  }
+  main {
+    margin: 1em;
+  }
+  section.bilingual {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    margin: 8px;
+    padding: 8px;
+  }
+  section.bilingual:not(:last-of-type) {
+    border-bottom: 1px solid #ccc;
+  }
+  section.bilingual > * {
+    flex: 1;
+  }
+  /* section > [lang="zh"] {
+		position: sticky;
+		top: 0;
+	} */
+
+  @media (min-width: 768px) {
+    section.bilingual {
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  }
+</style>

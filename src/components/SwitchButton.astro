@@ -1,0 +1,52 @@
+---
+export interface Props {
+  options: { id: string; label: string; checked?: boolean }[];
+}
+
+const options = Astro.props.options;
+---
+
+<fieldset>
+  <!-- <legend>Select a language</legend> -->
+  {
+    options.map(({ id, label, checked }) => (
+      <label>
+        <input type="radio" id={id} name="language" checked={checked} />
+        {label}
+      </label>
+    ))
+  }
+</fieldset>
+
+<style>
+  fieldset {
+    padding: 18px;
+    width: fit-content;
+    text-align: right;
+    border: none;
+  }
+
+  label {
+    user-select: none;
+    flex: 1;
+    margin: 0 5px;
+    padding: 10px;
+    border: none;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    transition: border-bottom 0.1s ease-in-out;
+  }
+
+  label:hover {
+    background-color: #ddd;
+    border-bottom: #F5A9B8 dashed 2px;
+  }
+
+  label:has(input:checked) {
+    border-bottom: #5bcefa solid 2px;
+  }
+
+  input {
+    display: none;
+  }
+</style>
