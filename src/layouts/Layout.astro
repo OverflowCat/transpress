@@ -74,7 +74,7 @@ console.log(html);
     transition: background-color 0.1s;
   }
   ::selection {
-    background-color: #5bcefa80;
+    background-color: #60606080;
   }
 
    section > [lang="en"]:has(span:nth-of-type(1):hover) + [lang="zh"] > span:nth-of-type(1) 
@@ -88,13 +88,19 @@ console.log(html);
   ,section:has([lang="zh"] span:nth-of-type(4):hover) [lang="en"] > span:nth-of-type(4) 
   ,section:has([lang="zh"] span:nth-of-type(5):hover) [lang="en"] > span:nth-of-type(5) 
 	{
-    background-color: #ffff0080;
+    background-color: #5bcefa80;
 		transition: background-color 0.1s;
   }
 
   html {
     font-family: system-ui, sans-serif;
   }
+	[lang="zh"] {
+		font-family: "Noto Serif CJK SC", serif, system-ui, -apple-system;
+	}
+	[lang="en"] {
+		font-family: "Georgia", "Times New Roman", Times, serif;
+	}
   code {
     font-family:
       Menlo,
@@ -106,13 +112,23 @@ console.log(html);
       Courier New,
       monospace;
   }
-  main {
-    margin: 1em;
+  body {
+    padding: 1em;
+		max-width: 1200px;
+		margin: auto;
   }
+	p {
+		line-height: 170%;
+		margin-block: 0.5em;
+	}
+
+	p[lang="zh"] {
+		line-height: 190%;
+	}
   section.bilingual {
     display: flex;
     flex-direction: column;
-    gap: 1em;
+    gap: 2px;
     margin: 8px;
     padding: 8px;
   }
@@ -131,6 +147,7 @@ console.log(html);
     section.bilingual {
       flex-direction: row;
       justify-content: space-between;
+			gap: 1em;
     }
   }
 </style>
